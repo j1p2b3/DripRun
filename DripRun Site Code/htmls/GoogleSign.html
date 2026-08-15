@@ -1,0 +1,48 @@
+<html>
+	<head>
+		<style>
+			body {
+				overflow: hidden !important;
+			}
+			#gsi-button-container {
+				display: inline-block;
+				justify-content: center;
+				align-items: center;
+				transform: scale(2.0);
+				transform-origin: center;
+				height: 0px !important;
+				width: 0px !important;
+			}
+		</style>
+		<script src='https://accounts.google.com/gsi/client'></script>
+	</head>
+	<body>
+		<div id='gsi-button-container'></div>
+		<script>
+			try {
+				google.accounts.id.initialize({
+					client_id: '1044348217685-0ab15pj9dlv89q263edlsi5op1skc1hm.apps.googleusercontent.com',
+					callback: handleAdminGoogleLogin,
+					auto_select: false,
+					cancel_on_tap_outside: true
+				});
+				google.accounts.id.renderButton(
+					document.getElementById('gsi-button-container'),
+					{
+						type: 'icon', 
+						theme: 'outline', 
+						size: 'large',
+						locale: 'en'
+					}
+				);
+			}
+			catch {
+				;
+			};
+			
+			function handleAdminGoogleLogin(response) {
+				window.parent.postMessage(response.credential, 'https://www.driprun.com.au/admin-login');
+			}
+		</script>
+	</body>
+</html>

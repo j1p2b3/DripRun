@@ -1,0 +1,9 @@
+org.gradle.jvmargs=-Xmx4096m
+org.gradle.parallel=true
+unityStreamingAssets=**STREAMING_ASSETS**
+
+android.useAndroidX=true
+android.enableJetifier=true
+
+# Allow compileSdk 35 on Unity 2022 toolchain
+android.suppressUnsupportedCompileSdk=35

@@ -1,0 +1,37 @@
+<html>
+	<head>
+		<style>
+			body {
+				overflow: hidden !important;
+			}
+			#fb-login-button {
+				display: inline-block;
+				justify-content: center;
+				align-items: center;
+				transform: scale(2.0);
+				transform-origin: center;
+				height: 0px !important;
+				width: 0px !important;
+			}
+		</style>
+		<script crossorigin="anonymous" src="https://connect.facebook.net/en_GB/sdk.js#xfbml=1&version=v24.0&appId=1382781443080366"></script>
+	</head>
+	<body>
+		<div id="fb-root"></div>
+		<div id="fb-login-button" class="fb-login-button"
+			data-width=""
+			data-size="large"
+			data-button-type=""
+			data-layout=""
+			data-auto-logout-link="false"
+			data-use-continue-as="false"
+			data-scope="email"
+			data-onlogin=handleAdminMetaLogin>
+		</div>
+		<script>
+			function handleAdminMetaLogin(response) {
+				window.parent.postMessage(response.authResponse.accessToken, 'https://www.driprun.com.au/admin-login');
+			};
+		</script>
+	</body>
+</html>

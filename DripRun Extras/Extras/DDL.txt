@@ -1,0 +1,769 @@
+--
+-- PostgreSQL database dump
+--
+
+\restrict jhKzYtv05RG0iCGqA62eBYKfd6Q6ATK6Y8VEirL2mLy6Ibc5HTFFCiX70DHRwca
+
+-- Dumped from database version 16.14
+-- Dumped by pg_dump version 16.15 (Ubuntu 16.15-1.pgdg22.04+2)
+
+SET statement_timeout = 0;
+SET lock_timeout = 0;
+SET idle_in_transaction_session_timeout = 0;
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = on;
+SELECT pg_catalog.set_config('search_path', '', false);
+SET check_function_bodies = false;
+SET xmloption = content;
+SET client_min_messages = warning;
+SET row_security = off;
+
+--
+-- Name: pg_cron; Type: EXTENSION; Schema: -; Owner: -
+--
+
+CREATE EXTENSION IF NOT EXISTS pg_cron WITH SCHEMA pg_catalog;
+
+
+--
+-- Name: EXTENSION pg_cron; Type: COMMENT; Schema: -; Owner: -
+--
+
+COMMENT ON EXTENSION pg_cron IS 'Job scheduler for PostgreSQL';
+
+
+--
+-- Name: public; Type: SCHEMA; Schema: -; Owner: -
+--
+
+-- *not* creating schema, since initdb creates it
+
+
+--
+-- Name: azure; Type: EXTENSION; Schema: -; Owner: -
+--
+
+CREATE EXTENSION IF NOT EXISTS azure WITH SCHEMA pg_catalog;
+
+
+--
+-- Name: EXTENSION azure; Type: COMMENT; Schema: -; Owner: -
+--
+
+COMMENT ON EXTENSION azure IS 'azure extension for PostgreSQL service';
+
+
+--
+-- Name: pgaadauth; Type: EXTENSION; Schema: -; Owner: -
+--
+
+CREATE EXTENSION IF NOT EXISTS pgaadauth WITH SCHEMA pg_catalog;
+
+
+--
+-- Name: EXTENSION pgaadauth; Type: COMMENT; Schema: -; Owner: -
+--
+
+COMMENT ON EXTENSION pgaadauth IS 'Azure Active Directory Authentication';
+
+
+SET default_tablespace = '';
+
+SET default_table_access_method = heap;
+
+--
+-- Name: brandrequests; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.brandrequests (
+    requestid integer NOT NULL,
+    name text NOT NULL
+);
+
+
+--
+-- Name: brandrequests_requestid_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.brandrequests_requestid_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: brandrequests_requestid_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.brandrequests_requestid_seq OWNED BY public.brandrequests.requestid;
+
+
+--
+-- Name: company; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.company (
+    companyid integer NOT NULL,
+    companyname character varying(100) NOT NULL
+);
+
+
+--
+-- Name: company_companyid_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.company_companyid_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: company_companyid_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.company_companyid_seq OWNED BY public.company.companyid;
+
+
+--
+-- Name: coupons; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.coupons (
+    couponid integer NOT NULL,
+    companyid integer NOT NULL,
+    logoimgname character varying(255) NOT NULL,
+    modelimgname character varying(255) NOT NULL,
+    imagename character varying(255) NOT NULL,
+    coupontype character varying(50) NOT NULL,
+    shopifylink character varying(512),
+    toslink text NOT NULL,
+    couponlevel integer DEFAULT 0 NOT NULL,
+    missionid integer,
+    description text,
+    dropname text DEFAULT ''::text,
+    ldboardpts integer DEFAULT 5 NOT NULL,
+    raidcount integer DEFAULT 4 NOT NULL,
+    CONSTRAINT coupons_coupontype_check CHECK (((coupontype)::text = ANY ((ARRAY['ImgGen'::character varying, 'ModelGen'::character varying, 'ImgShopify'::character varying, 'ModelShopify'::character varying, 'ImgGenShopify'::character varying, 'ModelGenShopify'::character varying])::text[])))
+);
+
+
+--
+-- Name: coupons_couponid_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.coupons_couponid_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: coupons_couponid_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.coupons_couponid_seq OWNED BY public.coupons.couponid;
+
+
+--
+-- Name: leaderboardprizes; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.leaderboardprizes (
+    prizeid integer NOT NULL,
+    prizeimagename character varying(255) NOT NULL
+);
+
+
+--
+-- Name: leaderboardprizes_prizeid_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.leaderboardprizes_prizeid_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: leaderboardprizes_prizeid_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.leaderboardprizes_prizeid_seq OWNED BY public.leaderboardprizes.prizeid;
+
+
+--
+-- Name: location; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.location (
+    locationid integer NOT NULL,
+    couponid integer NOT NULL,
+    latitude double precision NOT NULL,
+    longitude double precision NOT NULL,
+    "LocationName" text
+);
+
+
+--
+-- Name: location_locationid_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.location_locationid_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: location_locationid_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.location_locationid_seq OWNED BY public.location.locationid;
+
+
+--
+-- Name: missions; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.missions (
+    missionid integer NOT NULL,
+    companyid integer NOT NULL,
+    name character varying(35) NOT NULL,
+    status text NOT NULL,
+    imgname text NOT NULL,
+    locationname character varying(24) NOT NULL,
+    description text,
+    coupontotal integer NOT NULL,
+    isvisible boolean DEFAULT true NOT NULL,
+    CONSTRAINT status_check CHECK ((status = ANY (ARRAY['Active'::text, 'Closed'::text])))
+);
+
+
+--
+-- Name: missions_missionid_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.missions_missionid_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: missions_missionid_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.missions_missionid_seq OWNED BY public.missions.missionid;
+
+
+--
+-- Name: raidinstances; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.raidinstances (
+    raidinstanceid integer NOT NULL,
+    couponid integer NOT NULL,
+    userid integer NOT NULL,
+    timecreated timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+
+--
+-- Name: raidinstances_raidinstanceid_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.raidinstances_raidinstanceid_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: raidinstances_raidinstanceid_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.raidinstances_raidinstanceid_seq OWNED BY public.raidinstances.raidinstanceid;
+
+
+--
+-- Name: refresh_tokens; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.refresh_tokens (
+    token_id integer NOT NULL,
+    user_id integer NOT NULL,
+    family_id uuid NOT NULL,
+    token_hash text NOT NULL,
+    issued_utc timestamp with time zone DEFAULT now(),
+    expires_utc timestamp with time zone NOT NULL,
+    last_used_utc timestamp with time zone,
+    revoked_utc timestamp with time zone
+);
+
+
+--
+-- Name: refresh_tokens_token_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.refresh_tokens_token_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: refresh_tokens_token_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.refresh_tokens_token_id_seq OWNED BY public.refresh_tokens.token_id;
+
+
+--
+-- Name: user_coupon; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.user_coupon (
+    userid integer NOT NULL,
+    couponid integer NOT NULL,
+    dateearned date NOT NULL,
+    claimedat timestamp with time zone DEFAULT now() NOT NULL,
+    claimedviadaily boolean DEFAULT true NOT NULL
+);
+
+
+--
+-- Name: userbrandimpressions; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.userbrandimpressions (
+    impression_id integer NOT NULL,
+    userid integer NOT NULL,
+    companyid integer NOT NULL,
+    currenttime timestamp with time zone DEFAULT now() NOT NULL,
+    couponid integer,
+    missionid integer
+);
+
+
+--
+-- Name: userbrandimpressions_impression_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.userbrandimpressions_impression_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: userbrandimpressions_impression_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.userbrandimpressions_impression_id_seq OWNED BY public.userbrandimpressions.impression_id;
+
+
+--
+-- Name: users; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.users (
+    userid integer NOT NULL,
+    name character varying(100) NOT NULL,
+    email character varying(255) NOT NULL,
+    created_at date NOT NULL,
+    ispublic boolean DEFAULT true,
+    ldboardpts integer DEFAULT 0,
+    couponpoints integer DEFAULT 0 NOT NULL,
+    last_claimed_local_date date,
+    "AgeRange" character varying(20),
+    "Gender" character varying(20),
+    "CompanyID" integer
+);
+
+
+--
+-- Name: users_userid_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.users_userid_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: users_userid_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.users_userid_seq OWNED BY public.users.userid;
+
+
+--
+-- Name: brandrequests requestid; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.brandrequests ALTER COLUMN requestid SET DEFAULT nextval('public.brandrequests_requestid_seq'::regclass);
+
+
+--
+-- Name: company companyid; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.company ALTER COLUMN companyid SET DEFAULT nextval('public.company_companyid_seq'::regclass);
+
+
+--
+-- Name: coupons couponid; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.coupons ALTER COLUMN couponid SET DEFAULT nextval('public.coupons_couponid_seq'::regclass);
+
+
+--
+-- Name: leaderboardprizes prizeid; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.leaderboardprizes ALTER COLUMN prizeid SET DEFAULT nextval('public.leaderboardprizes_prizeid_seq'::regclass);
+
+
+--
+-- Name: location locationid; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.location ALTER COLUMN locationid SET DEFAULT nextval('public.location_locationid_seq'::regclass);
+
+
+--
+-- Name: missions missionid; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.missions ALTER COLUMN missionid SET DEFAULT nextval('public.missions_missionid_seq'::regclass);
+
+
+--
+-- Name: raidinstances raidinstanceid; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.raidinstances ALTER COLUMN raidinstanceid SET DEFAULT nextval('public.raidinstances_raidinstanceid_seq'::regclass);
+
+
+--
+-- Name: refresh_tokens token_id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.refresh_tokens ALTER COLUMN token_id SET DEFAULT nextval('public.refresh_tokens_token_id_seq'::regclass);
+
+
+--
+-- Name: userbrandimpressions impression_id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.userbrandimpressions ALTER COLUMN impression_id SET DEFAULT nextval('public.userbrandimpressions_impression_id_seq'::regclass);
+
+
+--
+-- Name: users userid; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.users ALTER COLUMN userid SET DEFAULT nextval('public.users_userid_seq'::regclass);
+
+
+--
+-- Name: brandrequests brandrequests_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.brandrequests
+    ADD CONSTRAINT brandrequests_pkey PRIMARY KEY (requestid);
+
+
+--
+-- Name: company company_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.company
+    ADD CONSTRAINT company_pkey PRIMARY KEY (companyid);
+
+
+--
+-- Name: coupons coupons_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.coupons
+    ADD CONSTRAINT coupons_pkey PRIMARY KEY (couponid);
+
+
+--
+-- Name: leaderboardprizes leaderboardprizes_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.leaderboardprizes
+    ADD CONSTRAINT leaderboardprizes_pkey PRIMARY KEY (prizeid);
+
+
+--
+-- Name: location location_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.location
+    ADD CONSTRAINT location_pkey PRIMARY KEY (locationid);
+
+
+--
+-- Name: missions missions_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.missions
+    ADD CONSTRAINT missions_pkey PRIMARY KEY (missionid);
+
+
+--
+-- Name: raidinstances raidinstances_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.raidinstances
+    ADD CONSTRAINT raidinstances_pkey PRIMARY KEY (raidinstanceid);
+
+
+--
+-- Name: refresh_tokens refresh_tokens_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.refresh_tokens
+    ADD CONSTRAINT refresh_tokens_pkey PRIMARY KEY (token_id);
+
+
+--
+-- Name: user_coupon user_coupon_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.user_coupon
+    ADD CONSTRAINT user_coupon_pkey PRIMARY KEY (userid, couponid);
+
+
+--
+-- Name: userbrandimpressions userbrandimpressions_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.userbrandimpressions
+    ADD CONSTRAINT userbrandimpressions_pkey PRIMARY KEY (impression_id);
+
+
+--
+-- Name: users users_email_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.users
+    ADD CONSTRAINT users_email_key UNIQUE (email);
+
+
+--
+-- Name: users users_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.users
+    ADD CONSTRAINT users_pkey PRIMARY KEY (userid);
+
+
+--
+-- Name: coupons_company_mission; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX coupons_company_mission ON public.coupons USING btree (companyid, missionid);
+
+
+--
+-- Name: idx_refresh_family_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_refresh_family_id ON public.refresh_tokens USING btree (family_id);
+
+
+--
+-- Name: idx_refresh_token_hash; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_refresh_token_hash ON public.refresh_tokens USING btree (token_hash);
+
+
+--
+-- Name: ubri_company_time; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX ubri_company_time ON public.userbrandimpressions USING btree (companyid, currenttime);
+
+
+--
+-- Name: ubri_coupon_time; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX ubri_coupon_time ON public.userbrandimpressions USING btree (couponid, currenttime);
+
+
+--
+-- Name: ubri_mission_time; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX ubri_mission_time ON public.userbrandimpressions USING btree (missionid, currenttime);
+
+
+--
+-- Name: ubri_user; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX ubri_user ON public.userbrandimpressions USING btree (userid);
+
+
+--
+-- Name: user_coupon_coupon_time; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX user_coupon_coupon_time ON public.user_coupon USING btree (couponid, dateearned);
+
+
+--
+-- Name: user_coupon_user_time; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX user_coupon_user_time ON public.user_coupon USING btree (userid, dateearned);
+
+
+--
+-- Name: coupons coupons_companyid_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.coupons
+    ADD CONSTRAINT coupons_companyid_fkey FOREIGN KEY (companyid) REFERENCES public.company(companyid) ON DELETE CASCADE;
+
+
+--
+-- Name: coupons fk_coupons_mission; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.coupons
+    ADD CONSTRAINT fk_coupons_mission FOREIGN KEY (missionid) REFERENCES public.missions(missionid) ON DELETE SET NULL;
+
+
+--
+-- Name: raidinstances fk_raidinstances_coupon; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.raidinstances
+    ADD CONSTRAINT fk_raidinstances_coupon FOREIGN KEY (couponid) REFERENCES public.coupons(couponid) ON DELETE CASCADE;
+
+
+--
+-- Name: raidinstances fk_raidinstances_user; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.raidinstances
+    ADD CONSTRAINT fk_raidinstances_user FOREIGN KEY (userid) REFERENCES public.users(userid) ON DELETE CASCADE;
+
+
+--
+-- Name: users fk_user_company; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.users
+    ADD CONSTRAINT fk_user_company FOREIGN KEY ("CompanyID") REFERENCES public.company(companyid) ON DELETE SET NULL;
+
+
+--
+-- Name: location location_couponid_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.location
+    ADD CONSTRAINT location_couponid_fkey FOREIGN KEY (couponid) REFERENCES public.coupons(couponid) ON DELETE CASCADE;
+
+
+--
+-- Name: missions missions_companyid_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.missions
+    ADD CONSTRAINT missions_companyid_fkey FOREIGN KEY (companyid) REFERENCES public.company(companyid) ON DELETE CASCADE;
+
+
+--
+-- Name: refresh_tokens refresh_tokens_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.refresh_tokens
+    ADD CONSTRAINT refresh_tokens_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(userid) ON DELETE CASCADE;
+
+
+--
+-- Name: user_coupon user_coupon_couponid_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.user_coupon
+    ADD CONSTRAINT user_coupon_couponid_fkey FOREIGN KEY (couponid) REFERENCES public.coupons(couponid) ON DELETE CASCADE;
+
+
+--
+-- Name: user_coupon user_coupon_userid_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.user_coupon
+    ADD CONSTRAINT user_coupon_userid_fkey FOREIGN KEY (userid) REFERENCES public.users(userid) ON DELETE CASCADE;
+
+
+--
+-- Name: userbrandimpressions userbrandimpressions_companyid_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.userbrandimpressions
+    ADD CONSTRAINT userbrandimpressions_companyid_fkey FOREIGN KEY (companyid) REFERENCES public.company(companyid) ON DELETE CASCADE;
+
+
+--
+-- Name: userbrandimpressions userbrandimpressions_couponid_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.userbrandimpressions
+    ADD CONSTRAINT userbrandimpressions_couponid_fkey FOREIGN KEY (couponid) REFERENCES public.coupons(couponid) ON DELETE SET NULL;
+
+
+--
+-- Name: userbrandimpressions userbrandimpressions_userid_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.userbrandimpressions
+    ADD CONSTRAINT userbrandimpressions_userid_fkey FOREIGN KEY (userid) REFERENCES public.users(userid) ON DELETE CASCADE;
+
+
+--
+-- PostgreSQL database dump complete
+--
+
+\unrestrict jhKzYtv05RG0iCGqA62eBYKfd6Q6ATK6Y8VEirL2mLy6Ibc5HTFFCiX70DHRwca

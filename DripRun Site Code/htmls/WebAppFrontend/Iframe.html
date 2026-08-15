@@ -1,0 +1,34 @@
+<html>
+	<head>
+  	</head>
+  	<body>
+		<iframe
+			id='driprunUnity'
+			src='https://driprunwebapp.z8.web.core.windows.net'
+			width='100%'
+			height='100%'
+			frameborder='0'
+			scrolling='no'
+			allow='fullscreen; geolocation; camera'>
+		</iframe>
+		<script>
+			window.onmessage = (event) => {
+              	if (event.data.messageType == 'dataUpdate') {
+					const iframe = document.getElementById('driprunUnity');
+					const email = event.data.payload.email;
+					const name = event.data.payload.name;
+					const accessToken = event.data.payload.accessToken;
+                    iframe.contentWindow.postMessage({
+						type: 'UNITY_SENDMESSAGE',
+						gameObject: 'Auto-SignInController',
+						method: 'ReceiveAuthJson',
+						payload: JSON.stringify({ email, name, accessToken })
+					}, iframe.src);
+				}
+				else if (event.data.type == 'UnityReady') {
+                  	window.parent.postMessage('UnityReady', 'https://www.driprun.com.au/drip-run-app');
+				};
+			}
+		</script>
+	</body>
+</html>

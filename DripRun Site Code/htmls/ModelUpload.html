@@ -1,0 +1,65 @@
+<script>
+  const btn = document.getElementById("uploadBtn");
+  const input = document.getElementById("fileInput");
+
+  let jwtToken = null;
+
+  // Receive messages from Wix
+  window.addEventListener("message", (event) => {
+    if (event.data?.type === "init") {
+      jwtToken = event.data.jwt;
+    }
+
+    if (event.data?.type === "reset") {
+      input.value = "";
+      btn.textContent = "+ Upload";
+      btn.style.backgroundColor = "#0b0b0b";
+    }
+  });
+
+  btn.onclick = () => input.click();
+
+  input.addEventListener("change", async () => {
+    const file = input.files[0];
+    if (!file) return;
+
+    btn.textContent = "Uploading...";
+    btn.style.backgroundColor = "#444";
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const res = await fetch(
+  "https://unity-app-backend-g5bfaedhawekhyay.australiaeast-01.azurewebsites.net/api/admin/upload-model",
+  {
+    method: "POST",
+    headers: jwtToken
+      ? { "Authorization": "Bearer " + jwtToken }
+      : {},
+    body: formData
+  }
+);
+
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error("Upload failed: " + text);
+      }
+
+      const data = await res.json();
+
+      // Send result back to Wix
+      window.parent.postMessage({
+        fileUrl: data.url
+      }, "*");
+
+      btn.textContent = "✔ " + file.name;
+      btn.style.backgroundColor = "#1f7a1f";
+
+    } catch (err) {
+      btn.textContent = "Upload failed";
+      btn.style.backgroundColor = "#a00000";
+      console.error(err);
+    }
+  });
+</script>

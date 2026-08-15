@@ -1,0 +1,48 @@
+<html>
+	<head>
+		<style>
+			body {
+				overflow: hidden !important;
+			}
+			#appleid-signin {
+				display: inline-block;
+				justify-content: center;
+				align-items: center;
+				transform: scale(2.75);
+				transform-origin: center;
+				height: 0px !important;
+				width: 0px !important;
+			}
+		</style>
+		<script src="https://appleid.cdn-apple.com/appleauth/static/jsapi/appleid/1/en_GB/appleid.auth.js"></script>
+	</head>
+	<body>
+		<div id="appleid-signin"
+			data-color="white"
+			data-border="true"
+			data-mode="logo-only"
+			data-type="sign in"
+			data-logo-size="large">
+		</div>
+		<script>
+			try {
+				AppleID.auth.init({
+					clientId: "com.driprun.web.adminlogin",
+					scope: "name email",
+					redirectURI: "https://www-driprun-com-au.filesusr.com",
+					usePopup: true
+				});
+
+				document.addEventListener('AppleIDSignInOnSuccess', (event) => {
+					window.parent.postMessage(event.detail.authorization.id_token, 'https://www.driprun.com.au/admin-login');
+				});
+				document.addEventListener('AppleIDSignInOnFailure', (event) => {
+					;
+				});
+			}
+			catch {
+				;
+			};
+		</script>
+	</body>
+</html>

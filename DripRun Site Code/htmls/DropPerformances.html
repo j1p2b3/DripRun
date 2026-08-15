@@ -1,0 +1,89 @@
+<html>
+    <script src="https://cdn.jsdelivr.net/npm/gridjs/dist/gridjs.umd.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/gridjs/dist/theme/mermaid.min.css" rel="stylesheet" />
+    <body>
+        <div id='myTable' style='display:flex;justify-content:center;align-items:center;width:100%;height:100%;overflow:hidden;'></div>
+        <script>
+            const grid = new gridjs.Grid({
+                columns: ['Coupon ID',
+                            'Drop Name',
+                            'Distinct Users',
+                            'Impressions',
+                            { 
+                                name: 'Link',
+                                formatter: (_, row) => gridjs.html(`<a href='${row.cells[4].data}' target='_blank' rel='noopener noreferrer'>Open Link`)
+                            },
+                            { 
+                                name: 'Location',
+                                formatter: (cell, row) => {
+                                    return gridjs.h('button', {
+                                        className: 'py-2 mb-4 px-4 border rounded-md text-white bg-blue',
+                                        onClick: () => window.parent.postMessage(['loc', String(row.cells[0].data)], 'https://www.driprun.com.au/admin-dashboard')
+                                    }, 'See Locations');
+                                }
+                            },
+                            { 
+                                name: 'Delete',
+                                formatter: (cell, row) => {
+                                    return gridjs.h('button', {
+                                        className: 'py-2 mb-4 px-4 border rounded-md text-white bg-blue',
+                                        onClick: () => window.parent.postMessage(['del', String(row.cells[0].data)], 'https://www.driprun.com.au/admin-dashboard')
+                                    }, 'Delete Drop');
+                                }
+                            }],
+                pagination: {
+                    limit: 8
+                },
+                fixedHeader: true,
+                search: true,
+                sort: true,
+                data: [],
+                style: { 
+                    width: '100%',
+                    height: '100%',
+                    table: { 
+                        'white-space': 'nowrap',
+                        'font-family': 'Arial'
+                    }
+                }
+            }).render(document.getElementById('myTable'));
+            
+            window.addEventListener('resize', () => {
+                const dynamicLimit = Math.floor((document.getElementById("myTable").offsetHeight - 150) / 45);
+                if (dynamicLimit < 1) {
+                    dynamicLimit = 1;
+                };
+                grid.updateConfig({
+                    pagination: {
+                        limit: dynamicLimit
+                    }
+                }).forceRender(document.getElementById('myTable'));
+            });
+            
+            window.onmessage = (event) => {
+				if (event.data) {
+					const dynamicLimit = Math.floor((document.getElementById("myTable").offsetHeight - 150) / 45);
+					if (dynamicLimit < 1) {
+						dynamicLimit = 1;
+					};
+                    const receivedData = event.data.payload;
+                    const arrayData = [];
+                    receivedData.forEach(dataEntry => {
+                        arrayData.push([dataEntry.couponId,
+                                          dataEntry.dropName,
+                                          dataEntry.distinctUsersWithCoupon,
+                                          dataEntry.impressions,
+                                          dataEntry.shopifyLink]);
+                    });
+                    
+                    grid.updateConfig({
+                        pagination: {
+							limit: dynamicLimit
+						},
+						data: arrayData
+                    }).forceRender(document.getElementById('myTable'));
+                };
+            };
+        </script>
+    </body>
+</html>
